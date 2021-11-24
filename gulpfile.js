@@ -1,4 +1,4 @@
-const { src, dest, parallel, series } = require('gulp');
+const { src, dest, parallel, series, watch } = require('gulp');
 const htmlmin = require('gulp-htmlmin');
 const sourcemaps = require('gulp-sourcemaps');
 const imagemin = require('gulp-imagemin');
@@ -58,10 +58,19 @@ function image() {
     .pipe(dest('./dist/img'))
 }
 
-exports.build = parallel(html, style, image)
+function watchFiles() {
+    watch('./src/scss/**/*.scss', style)
+    watch('./src/index.html', html)
+    watch('./src/img/*', image)
+    watch('./src/fonts/*.ttf', fonts)
+}
 
 exports.html = html;
 exports.style = style;
 exports.fonts = fonts;
 exports.image = image;
-exports.del = clean;
+exports.clean = clean;
+exports.watchFiles = watchFiles;
+
+exports.build = series(clean, parallel(html, style, image, fonts));
+exports.default = series(clean, parallel(html, style, image, fonts, browsersync, watchFiles));
